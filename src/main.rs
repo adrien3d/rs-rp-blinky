@@ -34,7 +34,9 @@ bind_interrupts!(struct Irqs {
 });
 
 #[embassy_executor::task]
-async fn cyw43_task(runner: cyw43::Runner<'static, Output<'static>, PioSpi<'static, PIO0, 0, DMA_CH0>>) -> ! {
+async fn cyw43_task(
+    runner: cyw43::Runner<'static, Output<'static>, PioSpi<'static, PIO0, 0, DMA_CH0>>,
+) -> ! {
     runner.run().await
 }
 
@@ -69,7 +71,7 @@ async fn main(spawner: Spawner) {
     let state = STATE.init(cyw43::State::new());
     let (_net_device, mut control, runner) = cyw43::new(state, pwr, spi, fw).await;
     unwrap!(spawner.spawn(cyw43_task(runner)));
-    
+
     info!("Starting RP2350 log test!");
     control.init(clm).await;
     control
