@@ -100,41 +100,115 @@ async fn main(spawner: Spawner) {
     info!("Placeholder5");
     // let config = Config::dhcpv4(Default::default());
     // // Use static IP configuration instead of DHCP
-    // let config = embassy_net::Config::ipv4_static(embassy_net::StaticConfigV4 {
-    //    address: Ipv4Cidr::new(Ipv4Addr::new(192, 168, 1, 22), 24),
-    //    dns_servers: Vec::new(),
-    //    gateway: Some(Ipv4Addr::new(192, 168, 69, 1)),
-    // });
+    let config = embassy_net::Config::ipv4_static(embassy_net::StaticConfigV4 {
+       address: Ipv4Cidr::new(Ipv4Addr::new(192, 168, 1, 22), 24),
+       dns_servers: Vec::new(),
+       gateway: Some(Ipv4Addr::new(192, 168, 1, 1)),
+    });
 
-    // // Generate random seed
-    // let seed = rng.next_u64();
+    // Generate random seed
+    let seed = rng.next_u64();
 
-    // // Init network stack
-    // static RESOURCES: StaticCell<StackResources<5>> = StaticCell::new();
-    // let (stack, runner) = embassy_net::new(net_device, config, RESOURCES.init(StackResources::new()), seed);
+    // Init network stack
+    static RESOURCES: StaticCell<StackResources<5>> = StaticCell::new();
+    let (stack, runner) = embassy_net::new(net_device, config, RESOURCES.init(StackResources::new()), seed);
 
-    // unwrap!(spawner.spawn(net_task(runner)));
+    unwrap!(spawner.spawn(net_task(runner)));
 
-    // loop {
-    //     match control
-    //         .join(WIFI_NETWORK, JoinOptions::new(WIFI_PASSWORD.as_bytes()))
-    //         .await
-    //     {
-    //         Ok(_) => break,
-    //         Err(err) => {
-    //             info!("join failed with status={}", err.status);
-    //         }
-    //     }
-    // }
+    loop {
+        match control
+            .join(WIFI_NETWORK, JoinOptions::new(WIFI_PASSWORD.as_bytes()))
+            .await
+        {
+            Ok(_) => break,
+            Err(err) => {
+                info!("join failed with status={}", err.status);
+            }
+        }
+    }
 
     // Wait for DHCP, not necessary when using static IP
-    // info!("waiting for DHCP...");
+    info!("waiting for DHCP...");
+    while !stack.is_config_up() {
+        Timer::after_millis(100).await;
+    }
+    info!("DHCP is now up!");
 
+    info!("waiting for link up...");
+    while !stack.is_link_up() {
+        Timer::after_millis(500).await;
+    }
+    info!("Link is up!");
 
-    // control.init(clm).await;
-    // control
-    //     .set_power_management(cyw43::PowerManagementMode::PowerSave)
-    //     .await;
+    info!("waiting for stack to be up...");
+    stack.wait_config_up().await;
+    info!("Stack is up!");
+    
+    // And now we can use it!
+    loop {
+    //     let mut rx_buffer = [0; 8192];
+    //     let mut tls_read_buffer = [0; 16640];
+    //     let mut tls_write_buffer = [0; 16640];
+
+    //     let client_state = TcpClientState::<1, 1024, 1024>::new();
+    //     let tcp_client = TcpClient::new(stack, &client_state);
+    //     let dns_client = DnsSocket::new(stack);
+    //     let tls_config = TlsConfig::new(seed, &mut tls_read_buffer, &mut tls_write_buffer, TlsVerify::None);
+
+    //     let mut http_client = HttpClient::new_with_tls(&tcp_client, &dns_client, tls_config);
+    //     let url = "https://worldtimeapi.org/api/timezone/Europe/Berlin";
+    //     // for non-TLS requests, use this instead:
+    //     // let mut http_client = HttpClient::new(&tcp_client, &dns_client);
+    //     // let url = "http://worldtimeapi.org/api/timezone/Europe/Berlin";
+
+    //     info!("connecting to {}", &url);
+
+    //     let mut request = match http_client.request(Method::GET, &url).await {
+    //         Ok(req) => req,
+    //         Err(e) => {
+    //             error!("Failed to make HTTP request: {:?}", e);
+    //             return; // handle the error
+    //         }
+    //     };
+
+    //     let response = match request.send(&mut rx_buffer).await {
+    //         Ok(resp) => resp,
+    //         Err(_e) => {
+    //             error!("Failed to send HTTP request");
+    //             return; // handle the error;
+    //         }
+    //     };
+
+    //     let body = match from_utf8(response.body().read_to_end().await.unwrap()) {
+    //         Ok(b) => b,
+    //         Err(_e) => {
+    //             error!("Failed to read response body");
+    //             return; // handle the error
+    //         }
+    //     };
+    //     info!("Response body: {:?}", &body);
+
+    //     // parse the response body and update the RTC
+
+    //     #[derive(Deserialize)]
+    //     struct ApiResponse<'a> {
+    //         datetime: &'a str,
+    //         // other fields as needed
+    //     }
+
+    //     let bytes = body.as_bytes();
+    //     match serde_json_core::de::from_slice::<ApiResponse>(bytes) {
+    //         Ok((output, _used)) => {
+    //             info!("Datetime: {:?}", output.datetime);
+    //         }
+    //         Err(_e) => {
+    //             error!("Failed to parse response body");
+    //             return; // handle the error
+    //         }
+    //     }
+
+    //     Timer::after(Duration::from_secs(5)).await;
+    // }
 
     let delay = Duration::from_millis(2000);
     loop {
@@ -147,79 +221,4 @@ async fn main(spawner: Spawner) {
         Timer::after(delay).await;
     }
 }
-
-
-
-//     info!("Placeholder3");
-
-//     static STATE: StaticCell<cyw43::State> = StaticCell::new();
-//     info!("Placeholder31");
-//     let state = STATE.init(cyw43::State::new());
-//     info!("Placeholder32");
-//     let (net_device, mut control, runner) = cyw43::new(state, pwr, spi, fw).await;
-    
-//     info!("Placeholder33");
-//     unwrap!(spawner.spawn(cyw43_task(runner)));
-
-//     info!("Placeholder4");
-//     control.init(clm).await;
-//     control
-//         .set_power_management(cyw43::PowerManagementMode::PowerSave)
-//         .await;
-
-//     let config = Config::dhcpv4(Default::default());
-
-//     info!("Placeholder5");
-//     // Use static IP configuration instead of DHCP
-//     //let config = embassy_net::Config::ipv4_static(embassy_net::StaticConfigV4 {
-//     //    address: Ipv4Cidr::new(Ipv4Address::new(192, 168, 69, 2), 24),
-//     //    dns_servers: Vec::new(),
-//     //    gateway: Some(Ipv4Address::new(192, 168, 69, 1)),
-//     //});
-
-//     // Generate random seed
-//     let seed = 123456789;//rng.next_u32(); //next_u64
-
-//     // Init network stack
-//     static RESOURCES: StaticCell<StackResources<5>> = StaticCell::new();
-//     let (stack, runner) = embassy_net::new(net_device, config, RESOURCES.init(StackResources::new()), seed);
-
-//     info!("Placeholder6");
-//     unwrap!(spawner.spawn(net_task(runner)));
-
-//     info!("Placeholder7");
-//     loop {
-//         match control
-//             .join(WIFI_NETWORK, JoinOptions::new(WIFI_PASSWORD.as_bytes()))
-//             .await
-//         {
-//             Ok(_) => break,
-//             Err(err) => {
-//                 info!("join failed with status={}", err.status);
-//             }
-//         }
-//     }
-//     info!("Placeholder8");
-
-//     // Wait for DHCP, not necessary when using static IP
-//     info!("waiting for DHCP...");
-//     while !stack.is_config_up() {
-//         Timer::after_millis(100).await;
-//         info!("waiting for DHCP in progress...");
-//     }
-//     info!("DHCP is now up!");
-
-
-
-//     info!("Placeholder9");
-
-//     loop {
-//         info!("led on!");
-//         led.set_high();
-//         Timer::after_millis(250).await;
-
-//         info!("led off!");
-//         led.set_low();
-//         Timer::after_millis(250).await;
-//     }
-// }
+}
