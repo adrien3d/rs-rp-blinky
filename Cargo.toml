@@ -56,7 +56,7 @@ static_cell = "2.1"
 portable-atomic = { version = "1.5", features = ["critical-section"] }
 log = "0.4"
 embedded-sdmmc = "0.9.0"
-reqwless = "0.13.0"
+reqwless = { version = "0.13.0", features = ["defmt"] }
 rand_core = "0.9.3"
 
 [profile.dev]

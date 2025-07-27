@@ -98,13 +98,13 @@ async fn main(spawner: Spawner) {
         .set_power_management(cyw43::PowerManagementMode::PowerSave)
         .await;
 
-    let config = Config::dhcpv4(Default::default());
+    // let config = Config::dhcpv4(Default::default());
     // // Use static IP configuration instead of DHCP
-    // let config = embassy_net::Config::ipv4_static(embassy_net::StaticConfigV4 {
-    //    address: Ipv4Cidr::new(Ipv4Addr::new(192, 168, 1, 22), 24),
-    //    dns_servers: Vec::new(),
-    //    gateway: Some(Ipv4Addr::new(192, 168, 1, 1)),
-    // });
+    let config = embassy_net::Config::ipv4_static(embassy_net::StaticConfigV4 {
+       address: Ipv4Cidr::new(Ipv4Addr::new(192, 168, 1, 95), 24),
+       dns_servers: Vec::new(),
+       gateway: Some(Ipv4Addr::new(192, 168, 1, 1)),
+    });
 
     // Generate random seed
     let seed = rng.next_u64();
@@ -169,7 +169,7 @@ async fn main(spawner: Spawner) {
         let mut request = match http_client.request(Method::GET, &url).await {
             Ok(req) => req,
             Err(e) => {
-                error!("Failed to make HTTP request:");
+                error!("Failed to make HTTP request:{:?}", e);
                 return; // handle the error
             }
         };
