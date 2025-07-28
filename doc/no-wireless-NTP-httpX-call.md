@@ -1,0 +1,13 @@
+4.393582 [WARN ] waiting for DHCP... (sonelio_pico_os pico-experiments/src/main.rs:131)
+4.393648 [WARN ] DHCP is now up! (sonelio_pico_os pico-experiments/src/main.rs:135)
+4.393668 [WARN ] waiting for link up... (sonelio_pico_os pico-experiments/src/main.rs:137)
+4.393864 [INFO ] link_up = true (embassy_net embassy-net-0.7.0/src/lib.rs:832)
+
+4.893753 [WARN ] Link is up! (sonelio_pico_os pico-experiments/src/main.rs:141)
+4.893781 [WARN ] waiting for stack to be up... (sonelio_pico_os pico-experiments/src/main.rs:143)
+4.893816 [WARN ] Stack is up! (sonelio_pico_os pico-experiments/src/main.rs:145)
+4.893833 [WARN ] Loop1 (sonelio_pico_os pico-experiments/src/main.rs:149)
+4.894014 [WARN ] Loop2 (sonelio_pico_os pico-experiments/src/main.rs:155)
+4.894033 [WARN ] Loop3 (sonelio_pico_os pico-experiments/src/main.rs:159)
+4.894057 [WARN ] Loop4 connecting to https://worldtimeapi.org/api/timezone/Europe/Berlin (sonelio_pico_os pico-experiments/src/main.rs:167)
+4.894787 [ERROR] Failed to make HTTP request:Dns (sonelio_pico_os pico-experiments/src/main.rs:172)
